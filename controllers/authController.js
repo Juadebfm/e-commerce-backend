@@ -50,4 +50,68 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { register };
+// Login
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Email Or Password" });
+    }
+
+    // Check password
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Email Or Password" });
+    }
+
+    // Create token
+    const token = createToken(user._id);
+
+    // Send reponse
+    res.status(200).json({
+      success: true,
+      message: "Login Successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error Logging In",
+      error: error.message,
+    });
+  }
+};
+
+// User profile
+const getProfile = async (req, res) => {
+  try {
+    // // req.user is set by auth middleware
+    // const user = await User.findById(req.user._id).select("-password");
+
+    const user = req.user;
+
+    res.json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error getting profile",
+      error: error.message,
+    });
+  }
+};
+module.exports = { register, login, getProfile };
