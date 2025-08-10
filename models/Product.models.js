@@ -133,3 +133,5 @@ productSchema.index({ name: "text", description: "text" });
 productSchema.index({ category: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ "rating.average": -1 });
+
+module.exports = mongoose.model("Product", productSchema);
